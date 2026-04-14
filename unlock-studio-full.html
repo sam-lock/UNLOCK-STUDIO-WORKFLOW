@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock Studio Workflow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#0c0c0c;--bg1:#141414;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--border3:rgba(255,255,255,.2);
+  --text:#e8e4dc;--text2:#888880;--text3:#555550;--text4:#333330;
+  --accent:#d4f270;--accent-dim:rgba(212,242,112,.1);--accent-mid:rgba(212,242,112,.2);
+  --red:#e06c5a;--blue:#5a9cf5;--purple:#c084f5;--amber:#f5a623;--teal:#4ecdc4;
+  --mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;font-family:var(--mono);color:var(--text);overflow:hidden;height:100vh;display:flex;flex-direction:column}
+
+/* ── TITLEBAR ── */
+.titlebar{height:44px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;-webkit-app-region:drag}
+.tl-lights{display:flex;gap:8px}
+.tl{width:12px;height:12px;border-radius:50%;cursor:pointer}
+.tl-r{background:#ff5f57}.tl-y{background:#febc2e}.tl-g{background:#28c840}
+.tb-brand{font-family:var(--display);font-size:13px;font-weight:800;color:var(--text);letter-spacing:.05em}
+.tb-brand span{color:var(--accent)}
+.tb-center{flex:1;display:flex;justify-content:center}
+.tb-view{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px}
+.tb-view-btn{font-size:10px;padding:4px 12px;border-radius:6px;cursor:pointer;color:var(--text3);font-family:var(--mono);border:none;background:transparent;transition:all .15s;letter-spacing:.04em}
+.tb-view-btn.active{background:var(--bg4);color:var(--text)}
+.tb-right{display:flex;gap:8px;align-items:center}
+.tb-btn{font-size:10px;padding:5px 12px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--mono);transition:all .15s;letter-spacing:.04em}
+.tb-btn:hover{color:var(--text);border-color:var(--border3)}
+.tb-btn.primary{background:var(--accent);color:#1a2200;border-color:var(--accent);font-weight:600}
+.tb-btn.primary:hover{background:#c8e860}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sb-logo{padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+.sb-logo-name{font-family:var(--display);font-size:15px;font-weight:800;color:var(--text)}
+.sb-logo-name span{color:var(--accent)}
+.sb-logo-sub{font-size:8px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.sb-scroll{flex:1;overflow-y:auto;padding:12px 0}
+.sb-scroll::-webkit-scrollbar{width:3px}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+.sb-section{margin-bottom:16px}
+.sb-label{font-size:9px;color:var(--text4);letter-spacing:.12em;text-transform:uppercase;padding:0 16px;margin-bottom:6px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .12s;border-left:2px solid transparent;position:relative}
+.sb-item:hover{color:var(--text);background:var(--bg2)}
+.sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim)}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:9px;padding:1px 6px;border-radius:6px;background:var(--bg3);color:var(--text3)}
+.sb-badge.on{background:var(--accent-dim);color:var(--accent)}
+.sb-divider{height:1px;background:var(--border);margin:8px 16px}
+
+/* Project list in sidebar */
+.proj-item{padding:8px 16px;cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+.proj-item:hover{background:var(--bg2)}
+.proj-item.active{background:var(--bg2);border-left-color:var(--accent)}
+.proj-item-name{font-size:11px;color:var(--text);font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-item-meta{display:flex;align-items:center;gap:6px}
+.proj-item-stage{font-size:9px;color:var(--text3)}
+.proj-item-bar{flex:1;height:2px;background:var(--bg4);border-radius:1px}
+.proj-item-fill{height:100%;border-radius:1px;background:var(--accent)}
+.proj-item-pct{font-size:9px;color:var(--text3);white-space:nowrap}
+
+.sb-bottom{padding:12px 16px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:8px}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-mid);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent);font-weight:600;flex-shrink:0}
+.sb-user-info .name{font-size:11px;color:var(--text)}
+.sb-user-info .role{font-size:9px;color:var(--text3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+
+/* Toolbar */
+.toolbar{height:46px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;background:var(--bg1)}
+.toolbar-title{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text)}
+.toolbar-sub{font-size:10px;color:var(--text3);margin-left:4px}
+.toolbar-right{margin-left:auto;display:flex;gap:8px}
+
+/* Content panels */
+.content{flex:1;overflow-y:auto;padding:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+/* ── VIEWS ── */
+.view{display:none;height:100%;overflow-y:auto}
+.view.active{display:block}
+.view::-webkit-scrollbar{width:4px}
+.view::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+.view-pad{padding:20px}
+
+/* ─── DASHBOARD VIEW ─── */
+.dash-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:20px}
+.stat-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent)}
+.sc-label{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.sc-val{font-size:22px;font-weight:700;color:var(--text);font-family:var(--display);line-height:1}
+.sc-val .u{font-size:12px;color:var(--text3);font-weight:400;font-family:var(--mono)}
+.sc-note{font-size:9px;margin-top:4px}
+.up{color:var(--accent)}.dn{color:var(--red)}.mid{color:var(--text3)}
+
+/* Projects grid */
+.proj-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.proj-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.proj-card:hover{border-color:var(--border3);transform:translateY(-1px)}
+.proj-card.urgent{border-color:rgba(224,108,90,.3)}
+.proj-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.proj-card-name{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.proj-card-client{font-size:9px;color:var(--text3);margin-top:2px}
+.proj-status{font-size:8px;padding:3px 8px;border-radius:10px;font-weight:600;letter-spacing:.05em;flex-shrink:0}
+.s-live{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-mid)}
+.s-review{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.s-hold{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.proj-stages{display:flex;gap:3px;margin-bottom:10px}
+.ps{flex:1;height:4px;border-radius:2px}
+.ps.done{background:var(--accent)}
+.ps.active{background:rgba(212,242,112,.4)}
+.ps.wait{background:var(--bg3)}
+.proj-meta{display:flex;align-items:center;justify-content:space-between}
+.proj-meta-left{font-size:9px;color:var(--text3)}
+.proj-meta-left .stage-name{color:var(--accent)}
+.proj-deadline{font-size:9px}
+.proj-deadline.soon{color:var(--red)}
+.proj-deadline.ok{color:var(--text3)}
+.proj-team{display:flex;gap:-4px;margin-top:8px}
+.proj-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg3);border:1px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text3);margin-left:-4px}
+.proj-avatar:first-child{margin-left:0}
+
+/* ─── WORKFLOW VIEW (mindmap-style) ─── */
+.workflow-wrap{padding:20px;min-height:100%}
+.wf-header{margin-bottom:24px}
+.wf-title{font-family:var(--display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.wf-sub{font-size:10px;color:var(--text3);letter-spacing:.06em}
+.flow-diagram{display:flex;flex-direction:column;gap:0}
+.flow-stage{display:flex;align-items:stretch;gap:0;position:relative}
+.flow-stage-connector{width:2px;background:var(--border2);margin:0 auto;height:20px}
+.flow-stage-connector.done{background:var(--accent)}
+.stage-main{display:flex;align-items:stretch;gap:12px;width:100%}
+.stage-node{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;width:220px;cursor:pointer;transition:all .15s;position:relative}
+.stage-node:hover{border-color:var(--border3)}
+.stage-node.done{border-color:rgba(212,242,112,.3);background:rgba(212,242,112,.04)}
+.stage-node.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim)}
+.stage-node.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:2px 2px 0 0}
+.stage-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--display);flex-shrink:0}
+.sn-done{background:var(--accent);color:#1a2200}
+.sn-active{background:var(--text);color:#0c0c0c}
+.sn-wait{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.stage-info{flex:1}
+.stage-info .name{font-size:12px;font-weight:600;color:var(--text);font-family:var(--display)}
+.stage-info .who{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.03em}
+.stage-tag{font-size:8px;padding:2px 7px;border-radius:8px;letter-spacing:.05em;font-weight:600;white-space:nowrap}
+.st-done{background:rgba(212,242,112,.12);color:var(--accent)}
+.st-active{border:1px solid var(--accent);color:var(--accent);background:transparent}
+.st-wait{background:var(--bg3);color:var(--text3)}
+.stage-line{width:40px;height:1px;background:var(--border2);flex-shrink:0;align-self:center}
+.stage-line.done{background:var(--accent)}
+.stage-tasks{flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.task-pill{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:10px;color:var(--text2);display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .12s}
+.task-pill:hover{border-color:var(--border2);color:var(--text)}
+.task-pill.done-t{color:var(--text3)}
+.task-pill.done-t .tp-check{background:var(--accent);border-color:var(--accent);color:#1a2200}
+.tp-check{width:14px;height:14px;border-radius:3px;border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .12s}
+.tp-who{margin-left:auto;font-size:8px;color:var(--text4);background:var(--bg3);padding:1px 6px;border-radius:5px}
+.confirm-gate{background:rgba(212,242,112,.06);border:1px solid rgba(212,242,112,.2);border-radius:8px;padding:8px 14px;font-size:9px;color:var(--accent);display:flex;align-items:center;gap:8px;margin:6px 0 0 272px;font-family:var(--mono)}
+.cg-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.confirm-gate .cg-btn{margin-left:auto;font-size:9px;padding:3px 10px;border-radius:6px;background:var(--accent);color:#1a2200;font-weight:600;cursor:pointer;border:none;font-family:var(--mono)}
+
+/* ─── PROJECT DETAIL VIEW ─── */
+.detail-header{padding:20px 20px 0;border-bottom:1px solid var(--border);padding-bottom:16px}
+.dh-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.dh-name{font-family:var(--display);font-size:20px;font-weight:700;color:var(--text)}
+.dh-client{font-size:11px;color:var(--text3);margin-top:3px}
+.dh-actions{display:flex;gap:8px}
+.dh-stages{display:flex;gap:4px}
+.dh-stage-pill{font-size:9px;padding:4px 10px;border-radius:10px;cursor:pointer;font-family:var(--mono);font-weight:600;letter-spacing:.04em;transition:all .12s}
+.dh-stage-pill.done{background:rgba(212,242,112,.12);color:var(--accent)}
+.dh-stage-pill.active{background:var(--accent);color:#1a2200}
+.dh-stage-pill.wait{background:var(--bg2);color:var(--text3);border:1px solid var(--border)}
+.detail-body{padding:20px;display:grid;grid-template-columns:1fr 320px;gap:16px}
+.detail-stage-list{display:flex;flex-direction:column;gap:10px}
+.ds-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .15s}
+.ds-card.active-stage{border-color:var(--accent)}
+.ds-card.locked-stage{opacity:.45}
+.ds-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border)}
+.ds-head:hover{background:var(--bg2)}
+.ds-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--display);flex-shrink:0}
+.ds-title{font-size:12px;font-weight:600;color:var(--text);font-family:var(--display)}
+.ds-subtitle{font-size:9px;color:var(--text3);margin-top:1px}
+.ds-progress{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ds-pct{font-size:10px;color:var(--text3)}
+.ds-tag{font-size:8px;padding:2px 8px;border-radius:8px;font-weight:600;letter-spacing:.05em}
+.ds-body{padding:14px 16px}
+.checklist-group{margin-bottom:14px}
+.cl-group-title{font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.cl-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .12s}
+.cl-item:last-child{border-bottom:none}
+.cl-item:hover{opacity:.8}
+.cl-cb{width:14px;height:14px;border-radius:3px;border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .12s;cursor:pointer}
+.cl-cb.ck{background:var(--accent);border-color:var(--accent);color:#1a2200}
+.cl-cb.ip{border-color:var(--accent)}
+.cl-text{font-size:11px;color:var(--text2);flex:1}
+.cl-text.done-cl{color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text4)}
+.cl-who{font-size:9px;color:var(--text4);background:var(--bg3);padding:1px 6px;border-radius:5px;white-space:nowrap}
+.upload-zone{border:1px dashed var(--border2);border-radius:var(--radius);padding:12px;text-align:center;cursor:pointer;transition:all .15s;margin-top:10px}
+.upload-zone:hover{border-color:var(--accent);background:var(--accent-dim)}
+.uz-icon{font-size:18px;margin-bottom:4px}
+.uz-text{font-size:10px;color:var(--text3)}
+.uz-sub{font-size:9px;color:var(--text4);margin-top:2px}
+.uploaded-files{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.uf-item{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 10px}
+.uf-icon{font-size:12px;flex-shrink:0}
+.uf-name{font-size:10px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uf-size{font-size:9px;color:var(--text3)}
+.confirm-required{background:rgba(212,242,112,.06);border:1px solid rgba(212,242,112,.25);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:10px}
+.cr-text{font-size:10px;color:var(--accent);flex:1}
+.cr-btn{font-size:10px;padding:5px 14px;border-radius:7px;background:var(--accent);color:#1a2200;font-weight:700;border:none;cursor:pointer;font-family:var(--mono)}
+
+/* Detail sidebar */
+.detail-side{display:flex;flex-direction:column;gap:10px}
+.side-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.side-card-title{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.ir-label{font-size:10px;color:var(--text3)}
+.ir-val{font-size:10px;color:var(--text);font-weight:500}
+.ir-val.accent{color:var(--accent)}
+.ir-val.warn{color:var(--amber)}
+.ir-val.danger{color:var(--red)}
+.team-list{display:flex;flex-direction:column;gap:6px}
+.team-member{display:flex;align-items:center;gap:8px}
+.tm-avatar{width:24px;height:24px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3);flex-shrink:0}
+.tm-name{font-size:10px;color:var(--text)}
+.tm-role{font-size:9px;color:var(--text3);margin-left:auto}
+.activity-list{display:flex;flex-direction:column;gap:0}
+.act-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:4px}
+.act-dot.green{background:var(--accent)}
+.act-dot.amber{background:var(--amber)}
+.act-content{flex:1}
+.act-text{font-size:10px;color:var(--text2);line-height:1.4}
+.act-time{font-size:9px;color:var(--text3);margin-top:2px}
+.client-link-card{background:var(--accent-dim);border:1px solid var(--accent-mid);border-radius:var(--radius);padding:12px 14px}
+.cl-title{font-size:9px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.cl-url{font-size:10px;color:var(--text2);word-break:break-all;margin-bottom:8px;font-family:var(--mono)}
+.cl-copy{width:100%;font-size:10px;padding:6px;border-radius:6px;background:var(--accent);color:#1a2200;font-weight:700;border:none;cursor:pointer;font-family:var(--mono)}
+
+/* STATUS BAR */
+.statusbar{height:26px;background:var(--bg1);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:16px;flex-shrink:0}
+.sb-i{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;display:flex;align-items:center;gap:4px}
+.sb-dot{width:4px;height:4px;border-radius:50%}
+.sd-live{background:var(--accent);animation:blink 2s infinite}
+.sd-warn{background:var(--amber)}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg1);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;width:480px;max-height:80vh;overflow-y:auto}
+.modal-title{font-family:var(--display);font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.form-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);font-family:var(--mono);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent)}
+.form-select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);font-family:var(--mono);outline:none;appearance:none;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.view.active{animation:fadeIn .2s ease}
+</style>
+</head>
+<body>
+
+<!-- TITLEBAR -->
+<div class="titlebar">
+  <div class="tl-lights">
+    <div class="tl tl-r" onclick="document.body.style.display='none'"></div>
+    <div class="tl tl-y"></div>
+    <div class="tl tl-g"></div>
+  </div>
+  <div class="tb-brand">UNLOCK <span>STUDIO</span> WORKFLOW</div>
+  <div class="tb-center">
+    <div class="tb-view">
+      <div class="tb-view-btn active" onclick="switchView('dashboard',this)">Dashboard</div>
+      <div class="tb-view-btn" onclick="switchView('workflow',this)">工作流</div>
+      <div class="tb-view-btn" onclick="switchView('detail',this)">项目详情</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" onclick="openModal()">+ 新建项目</button>
+    <button class="tb-btn">导出报告</button>
+    <button class="tb-btn primary" onclick="copyClientLink()">客户链接 ↗</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">UNLOCK <span>STUDIO</span></div>
+      <div class="sb-logo-sub">Workflow System · 2025</div>
+    </div>
+    <div class="sb-scroll">
+      <div class="sb-section">
+        <div class="sb-label">导航</div>
+        <div class="sb-item active" onclick="setNav(this,'dashboard')">
+          <div class="sb-dot" style="background:var(--accent)"></div>总览
+          <span class="sb-badge on">LIVE</span>
+        </div>
+        <div class="sb-item" onclick="setNav(this,'workflow')">
+          <div class="sb-dot" style="background:var(--text3)"></div>工作流图
+        </div>
+        <div class="sb-item" onclick="setNav(this,'detail')">
+          <div class="sb-dot" style="background:var(--text3)"></div>项目详情
+        </div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-label">进行中项目</div>
+
+        <div class="proj-item active" onclick="setNav(this,'detail')">
+          <div class="proj-item-name">品牌春季广告 2025</div>
+          <div class="proj-item-meta">
+            <div class="proj-item-stage">S3 · AI分镜</div>
+            <div class="proj-item-bar"><div class="proj-item-fill" style="width:60%"></div></div>
+            <div class="proj-item-pct">60%</div>
+          </div>
+        </div>
+
+        <div class="proj-item" onclick="setNav(this,'detail')">
+          <div class="proj-item-name">汽车品牌夏季TVC</div>
+          <div class="proj-item-meta">
+            <div class="proj-item-stage">S2 · 资产</div>
+            <div class="proj-item-bar"><div class="proj-item-fill" style="width:35%"></div></div>
+            <div class="proj-item-pct">35%</div>
+          </div>
+        </div>
+
+        <div class="proj-item" onclick="setNav(this,'detail')">
+          <div class="proj-item-name">电商双十一主片</div>
+          <div class="proj-item-meta">
+            <div class="proj-item-stage">S4 · 视频</div>
+            <div class="proj-item-bar"><div class="proj-item-fill" style="width:80%"></div></div>
+            <div class="proj-item-pct">80%</div>
+          </div>
+        </div>
+
+        <div class="proj-item" onclick="setNav(this,'detail')">
+          <div class="proj-item-name">美妆品牌形象片</div>
+          <div class="proj-item-meta">
+            <div class="proj-item-stage">S1 · Treatment</div>
+            <div class="proj-item-bar"><div class="proj-item-fill" style="width:15%"></div></div>
+            <div class="proj-item-pct">15%</div>
+          </div>
+        </div>
+
+        <div class="proj-item" onclick="setNav(this,'detail')">
+          <div class="proj-item-name">运动品牌春季KV</div>
+          <div class="proj-item-meta">
+            <div class="proj-item-stage">S5 · 交付</div>
+            <div class="proj-item-bar"><div class="proj-item-fill" style="width:95%"></div></div>
+            <div class="proj-item-pct">95%</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">陈</div>
+        <div class="sb-user-info">
+          <div class="name">陈昊</div>
+          <div class="role">导演 · 管理员</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="toolbar">
+      <div class="toolbar-title" id="toolbar-title">项目总览</div>
+      <div class="toolbar-sub" id="toolbar-sub">5个进行中 · 2025年4月</div>
+      <div class="toolbar-right">
+        <button class="tb-btn" style="font-size:9px">筛选</button>
+        <button class="tb-btn" style="font-size:9px">排序</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD VIEW ── -->
+      <div class="view active view-pad" id="view-dashboard">
+        <div class="dash-stats">
+          <div class="stat-card">
+            <div class="sc-label">进行中项目</div>
+            <div class="sc-val">5</div>
+            <div class="sc-note up">+ 2 本月新增</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">待客户确认</div>
+            <div class="sc-val">3</div>
+            <div class="sc-note" style="color:var(--amber)">需跟进</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">本周交付</div>
+            <div class="sc-val">1</div>
+            <div class="sc-note dn">运动春季KV</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">AI分镜总量</div>
+            <div class="sc-val">186<span class="u">张</span></div>
+            <div class="sc-note up">↑ +24 今日</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">团队成员</div>
+            <div class="sc-val">11</div>
+            <div class="sc-note mid">4角色在线</div>
+          </div>
+        </div>
+
+        <div style="font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">当前项目</div>
+        <div class="proj-grid">
+
+          <div class="proj-card" onclick="switchView('detail',null)">
+            <div class="proj-card-top">
+              <div><div class="proj-card-name">品牌春季广告 2025</div><div class="proj-card-client">客户：某品牌 · 导演：陈昊</div></div>
+              <div class="proj-status s-live">LIVE</div>
+            </div>
+            <div class="proj-stages">
+              <div class="ps done"></div><div class="ps done"></div><div class="ps active"></div><div class="ps wait"></div><div class="ps wait"></div>
+            </div>
+            <div class="proj-meta">
+              <div class="proj-meta-left">S3 · <span class="stage-name">AI分镜生成</span></div>
+              <div class="proj-deadline soon">May 18 · 12天</div>
+            </div>
+            <div class="proj-team">
+              <div class="proj-avatar" style="background:rgba(212,242,112,.15);color:var(--accent)">陈</div>
+              <div class="proj-avatar">李</div><div class="proj-avatar">王</div><div class="proj-avatar">张</div>
+            </div>
+          </div>
+
+          <div class="proj-card">
+            <div class="proj-card-top">
+              <div><div class="proj-card-name">汽车品牌夏季TVC</div><div class="proj-card-client">客户：某汽车 · 导演：陈昊</div></div>
+              <div class="proj-status s-review">REVIEW</div>
+            </div>
+            <div class="proj-stages">
+              <div class="ps done"></div><div class="ps active"></div><div class="ps wait"></div><div class="ps wait"></div><div class="ps wait"></div>
+            </div>
+            <div class="proj-meta">
+              <div class="proj-meta-left">S2 · <span class="stage-name">资产创建</span></div>
+              <div class="proj-deadline ok">Jun 05 · 52天</div>
+            </div>
+            <div class="proj-team">
+              <div class="proj-avatar">李</div><div class="proj-avatar">赵</div><div class="proj-avatar">周</div>
+            </div>
+          </div>
+
+          <div class="proj-card">
+            <div class="proj-card-top">
+              <div><div class="proj-card-name">电商双十一主片</div><div class="proj-card-client">客户：某电商 · 导演：王磊</div></div>
+              <div class="proj-status s-live">LIVE</div>
+            </div>
+            <div class="proj-stages">
+              <div class="ps done"></div><div class="ps done"></div><div class="ps done"></div><div class="ps active"></div><div class="ps wait"></div>
+            </div>
+            <div class="proj-meta">
+              <div class="proj-meta-left">S4 · <span class="stage-name">AI视频生成</span></div>
+              <div class="proj-deadline soon">Apr 28 · 14天</div>
+            </div>
+            <div class="proj-team">
+              <div class="proj-avatar">王</div><div class="proj-avatar">刘</div><div class="proj-avatar">孙</div><div class="proj-avatar">吴</div>
+            </div>
+          </div>
+
+          <div class="proj-card">
+            <div class="proj-card-top">
+              <div><div class="proj-card-name">美妆品牌形象片</div><div class="proj-card-client">客户：某美妆 · 导演：李娜</div></div>
+              <div class="proj-status s-review">REVIEW</div>
+            </div>
+            <div class="proj-stages">
+              <div class="ps active"></div><div class="ps wait"></div><div class="ps wait"></div><div class="ps wait"></div><div class="ps wait"></div>
+            </div>
+            <div class="proj-meta">
+              <div class="proj-meta-left">S1 · <span class="stage-name">Treatment</span></div>
+              <div class="proj-deadline ok">May 30 · 46天</div>
+            </div>
+            <div class="proj-team">
+              <div class="proj-avatar">李</div><div class="proj-avatar">陈</div>
+            </div>
+          </div>
+
+          <div class="proj-card urgent">
+            <div class="proj-card-top">
+              <div><div class="proj-card-name">运动品牌春季KV</div><div class="proj-card-client">客户：某运动 · 导演：陈昊</div></div>
+              <div class="proj-status s-hold">FINAL</div>
+            </div>
+            <div class="proj-stages">
+              <div class="ps done"></div><div class="ps done"></div><div class="ps done"></div><div class="ps done"></div><div class="ps active"></div>
+            </div>
+            <div class="proj-meta">
+              <div class="proj-meta-left">S5 · <span class="stage-name">调色交付</span></div>
+              <div class="proj-deadline soon">Apr 18 · 4天</div>
+            </div>
+            <div class="proj-team">
+              <div class="proj-avatar">陈</div><div class="proj-avatar">赵</div><div class="proj-avatar">周</div>
+            </div>
+          </div>
+
+          <!-- New project card -->
+          <div class="proj-card" style="border-style:dashed;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:140px" onclick="openModal()">
+            <div style="text-align:center">
+              <div style="font-size:24px;color:var(--text4);margin-bottom:8px">+</div>
+              <div style="font-size:11px;color:var(--text3)">新建项目</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── WORKFLOW VIEW ── -->
+      <div class="view view-pad" id="view-workflow">
+        <div class="wf-header">
+          <div class="wf-title">AI 商业片生产工作流</div>
+          <div class="wf-sub">UNLOCK STUDIO · 标准作业流程 · 点击任意任务可勾选完成</div>
+        </div>
+
+        <div class="flow-diagram">
+
+          <!-- S1 -->
+          <div class="flow-stage">
+            <div class="stage-main">
+              <div class="stage-node done">
+                <div class="stage-num sn-done">1</div>
+                <div class="stage-info">
+                  <div class="name">Treatment</div>
+                  <div class="who">导演 · 制片</div>
+                </div>
+                <div class="stage-tag st-done">DONE</div>
+              </div>
+              <div class="stage-line done"></div>
+              <div class="stage-tasks">
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>创作Treatment文档，确定风格方向<div class="tp-who">导演</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>收集参考素材，输出参考板<div class="tp-who">导演</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>剪辑Demo，建立初版剪辑线<div class="tp-who">剪辑</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>Demo逐帧截图，制作分镜脚本<div class="tp-who">导演</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="confirm-gate" style="margin-left:272px;margin-top:6px;margin-bottom:4px">
+            <div class="cg-dot" style="background:var(--accent);animation:none;opacity:1"></div>
+            客户确认 Stage 1 · 已通过
+            <div style="margin-left:auto;font-size:9px;color:var(--accent);font-weight:600">✓ Apr 08</div>
+          </div>
+          <div class="flow-stage-connector done"></div>
+
+          <!-- S2 -->
+          <div class="flow-stage">
+            <div class="stage-main">
+              <div class="stage-node done">
+                <div class="stage-num sn-done">2</div>
+                <div class="stage-info">
+                  <div class="name">资产创建</div>
+                  <div class="who">AI操作 · 导演</div>
+                </div>
+                <div class="stage-tag st-done">DONE</div>
+              </div>
+              <div class="stage-line done"></div>
+              <div class="stage-tasks">
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>生成人物设计图（角色外观·性格）<div class="tp-who">AI操作</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>生成场景设计图（12个场景）<div class="tp-who">AI操作</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>生成服化道资产图<div class="tp-who">AI操作</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>整理资产库，导演审核<div class="tp-who">导演</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="confirm-gate" style="margin-left:272px;margin-top:6px;margin-bottom:4px">
+            <div class="cg-dot" style="background:var(--accent);animation:none;opacity:1"></div>
+            客户确认 Stage 2 · 已通过
+            <div style="margin-left:auto;font-size:9px;color:var(--accent);font-weight:600">✓ Apr 14</div>
+          </div>
+          <div class="flow-stage-connector done"></div>
+
+          <!-- S3 ACTIVE -->
+          <div class="flow-stage">
+            <div class="stage-main">
+              <div class="stage-node active">
+                <div class="stage-num sn-active">3</div>
+                <div class="stage-info">
+                  <div class="name">AI 分镜生成</div>
+                  <div class="who">AI操作 · 导演</div>
+                </div>
+                <div class="stage-tag st-active">IN PROGRESS</div>
+              </div>
+              <div class="stage-line" style="background:var(--accent)"></div>
+              <div class="stage-tasks">
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>对照Demo截图逐镜写提示词<div class="tp-who">AI操作</div></div>
+                <div class="task-pill done-t" onclick="toggleTask(this)"><div class="tp-check">✓</div>第1-24镜生成完成，导演审核<div class="tp-who">导演</div></div>
+                <div class="task-pill" onclick="toggleTask(this)"><div class="tp-check ip"></div>第25-40镜生成中<div class="tp-who">AI操作</div></div>
+                <div class="task-pill" onclick="toggleTask(this)"><div class="tp-check"></div>替换分镜脚本，完成正式版<div class="tp-who">导演</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="confirm-gate" style="margin-left:272px;margin-top:6px;margin-bottom:4px">
+            <div class="cg-dot"></div>
+            等待客户确认 Stage 3 — 分镜图完成后发送
+            <button class="cg-btn" onclick="alert('客户链接已复制到剪贴板')">发送给客户</button>
+          </div>
+          <div class="flow-stage-connector"></div>
+
+          <!-- S4 -->
+          <div class="flow-stage" style="opacity:.5">
+            <div class="stage-main">
+              <div class="stage-node">
+                <div class="stage-num sn-wait">4</div>
+                <div class="stage-info">
+                  <div class="name">AI 视频生成</div>
+                  <div class="who">AI操作 · 剪辑</div>
+                </div>
+                <div class="stage-tag st-wait">LOCKED</div>
+              </div>
+              <div class="stage-line"></div>
+              <div class="stage-tasks">
+                <div class="task-pill"><div class="tp-check"></div>逐镜跑AI视频，批量生成<div class="tp-who">AI操作</div></div>
+                <div class="task-pill"><div class="tp-check"></div>筛选最佳镜头，导演审片<div class="tp-who">导演</div></div>
+                <div class="task-pill"><div class="tp-check"></div>回填Demo剪辑线，替换参考素材<div class="tp-who">剪辑</div></div>
+                <div class="task-pill"><div class="tp-check"></div>粗剪完成，内部过审<div class="tp-who">制片</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="flow-stage-connector"></div>
+
+          <!-- S5 -->
+          <div class="flow-stage" style="opacity:.5;margin-bottom:20px">
+            <div class="stage-main">
+              <div class="stage-node">
+                <div class="stage-num sn-wait">5</div>
+                <div class="stage-info">
+                  <div class="name">调色 · 交付</div>
+                  <div class="who">剪辑 · 制片</div>
+                </div>
+                <div class="stage-tag st-wait">LOCKED</div>
+              </div>
+              <div class="stage-line"></div>
+              <div class="stage-tasks">
+                <div class="task-pill"><div class="tp-check"></div>调色，确定影片色调风格<div class="tp-who">剪辑</div></div>
+                <div class="task-pill"><div class="tp-check"></div>Online精剪，字幕包装<div class="tp-who">剪辑</div></div>
+                <div class="task-pill"><div class="tp-check"></div>制片审片，内部最终确认<div class="tp-who">制片</div></div>
+                <div class="task-pill"><div class="tp-check"></div>成片交付客户<div class="tp-who">制片</div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── PROJECT DETAIL VIEW ── -->
+      <div class="view" id="view-detail">
+        <div class="detail-header">
+          <div class="dh-top">
+            <div>
+              <div class="dh-name">品牌春季广告 2025</div>
+              <div class="dh-client">客户：某品牌 · 导演：陈昊 · 制片：李明</div>
+            </div>
+            <div class="dh-actions">
+              <button class="tb-btn" style="font-size:10px" onclick="copyClientLink()">复制客户链接</button>
+              <button class="tb-btn primary" style="font-size:10px">生成分镜提示词 ↗</button>
+            </div>
+          </div>
+          <div class="dh-stages">
+            <div class="dh-stage-pill done">S1 Treatment ✓</div>
+            <div class="dh-stage-pill done">S2 资产 ✓</div>
+            <div class="dh-stage-pill active">S3 AI分镜 →</div>
+            <div class="dh-stage-pill wait">S4 视频</div>
+            <div class="dh-stage-pill wait">S5 交付</div>
+          </div>
+        </div>
+
+        <div class="detail-body">
+          <div class="detail-stage-list">
+
+            <!-- Stage 1 -->
+            <div class="ds-card">
+              <div class="ds-head">
+                <div class="ds-num sn-done" style="width:24px;height:24px;font-size:10px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent);color:#1a2200">1</div>
+                <div><div class="ds-title">Treatment</div><div class="ds-subtitle">导演 · 制片负责</div></div>
+                <div class="ds-progress">
+                  <div class="ds-pct">100%</div>
+                  <div class="ds-tag st-done">完成</div>
+                </div>
+              </div>
+              <div class="ds-body">
+                <div class="checklist-group">
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">Treatment文档（风格·叙事·参考板）</div><div class="cl-who">导演</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">参考视频收集，建立参考库</div><div class="cl-who">导演</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">剪辑Demo，输出初版剪辑线</div><div class="cl-who">剪辑</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">Demo逐镜截图，制作40张分镜脚本</div><div class="cl-who">导演</div></div>
+                </div>
+                <div class="uploaded-files">
+                  <div class="uf-item"><div class="uf-icon">🎬</div><div class="uf-name">treatment_v3_final.pdf</div><div class="uf-size">2.4MB</div></div>
+                  <div class="uf-item"><div class="uf-icon">🎞</div><div class="uf-name">demo_cut_v2.mp4</div><div class="uf-size">128MB</div></div>
+                  <div class="uf-item"><div class="uf-icon">🖼</div><div class="uf-name">storyboard_screenshots.zip</div><div class="uf-size">45MB</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="ds-card">
+              <div class="ds-head">
+                <div class="ds-num sn-done" style="width:24px;height:24px;font-size:10px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent);color:#1a2200">2</div>
+                <div><div class="ds-title">资产创建</div><div class="ds-subtitle">AI操作 · 导演审核</div></div>
+                <div class="ds-progress">
+                  <div class="ds-pct">100%</div>
+                  <div class="ds-tag st-done">完成</div>
+                </div>
+              </div>
+              <div class="ds-body">
+                <div class="checklist-group">
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">人物设计图（5个角色，外观·性格）</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">场景设计图（12个场景，氛围参考）</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">服化道资产图（服装·道具·妆发）</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">整理资产库，导演确认，客户审批</div><div class="cl-who">导演</div></div>
+                </div>
+                <div class="uploaded-files">
+                  <div class="uf-item"><div class="uf-icon">🖼</div><div class="uf-name">characters_v2.zip</div><div class="uf-size">89MB</div></div>
+                  <div class="uf-item"><div class="uf-icon">🖼</div><div class="uf-name">scenes_assets.zip</div><div class="uf-size">156MB</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 3 ACTIVE -->
+            <div class="ds-card active-stage">
+              <div class="ds-head">
+                <div class="ds-num sn-active" style="width:24px;height:24px;font-size:10px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--text);color:#0c0c0c">3</div>
+                <div><div class="ds-title">AI 分镜生成</div><div class="ds-subtitle">AI操作 · 导演审核</div></div>
+                <div class="ds-progress">
+                  <div class="ds-pct">60%</div>
+                  <div class="ds-tag st-active">进行中</div>
+                </div>
+              </div>
+              <div class="ds-body">
+                <div class="checklist-group">
+                  <div class="cl-label" style="font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">生成任务</div>
+                  <div class="cl-item" onclick="toggleCL(this)"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">对照Demo截图，逐镜编写AI提示词</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item" onclick="toggleCL(this)"><div class="cl-cb ck">✓</div><div class="cl-text done-cl">第1-24镜生成完成，导演审核通过</div><div class="cl-who">导演</div></div>
+                  <div class="cl-item" onclick="toggleCL(this)"><div class="cl-cb ip"></div><div class="cl-text">第25-40镜生成中（进行中）</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item" onclick="toggleCL(this)"><div class="cl-cb"></div><div class="cl-text">全部替换分镜脚本，完成正式版本</div><div class="cl-who">导演</div></div>
+                </div>
+                <div class="upload-zone" onclick="triggerUpload(this)">
+                  <div class="uz-icon">⬆</div>
+                  <div class="uz-text">上传分镜图文件</div>
+                  <div class="uz-sub">支持 JPG / PNG / PDF · 单文件最大 100MB</div>
+                  <input type="file" style="display:none" multiple accept="image/*,.pdf" onchange="handleUpload(this)">
+                </div>
+                <div class="uploaded-files" id="upload-list-3">
+                  <div class="uf-item"><div class="uf-icon">🖼</div><div class="uf-name">storyboard_AI_01-24.zip</div><div class="uf-size">67MB</div></div>
+                </div>
+                <div class="confirm-required">
+                  <div class="cr-text">分镜完成后需客户确认，方可进入 Stage 4</div>
+                  <button class="cr-btn" onclick="alert('已发送客户确认链接！')">发送确认</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 4 locked -->
+            <div class="ds-card locked-stage">
+              <div class="ds-head">
+                <div class="ds-num sn-wait" style="width:24px;height:24px;font-size:10px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text3);border:1px solid var(--border2)">4</div>
+                <div><div class="ds-title">AI 视频生成</div><div class="ds-subtitle">AI操作 · 剪辑</div></div>
+                <div class="ds-progress">
+                  <div class="ds-tag st-wait">待解锁</div>
+                </div>
+              </div>
+              <div class="ds-body">
+                <div class="checklist-group">
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">逐镜跑AI视频，批量生成</div><div class="cl-who">AI操作</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">筛选最佳镜头，导演审片</div><div class="cl-who">导演</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">回填Demo剪辑线，替换参考素材</div><div class="cl-who">剪辑</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">粗剪完成，内部过审</div><div class="cl-who">制片</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 5 locked -->
+            <div class="ds-card locked-stage">
+              <div class="ds-head">
+                <div class="ds-num sn-wait" style="width:24px;height:24px;font-size:10px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text3);border:1px solid var(--border2)">5</div>
+                <div><div class="ds-title">调色 · 交付</div><div class="ds-subtitle">剪辑 · 制片</div></div>
+                <div class="ds-progress">
+                  <div class="ds-tag st-wait">待解锁</div>
+                </div>
+              </div>
+              <div class="ds-body">
+                <div class="checklist-group">
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">调色，确定影片色调风格</div><div class="cl-who">剪辑</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">Online精剪，字幕包装完成</div><div class="cl-who">剪辑</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">制片审片，内部最终确认</div><div class="cl-who">制片</div></div>
+                  <div class="cl-item"><div class="cl-cb"></div><div class="cl-text">成片交付客户，归档</div><div class="cl-who">制片</div></div>
+                </div>
+                <div class="upload-zone" style="opacity:.5;pointer-events:none">
+                  <div class="uz-icon">⬆</div>
+                  <div class="uz-text">上传成片文件</div>
+                  <div class="uz-sub">解锁后可上传</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- DETAIL SIDEBAR -->
+          <div class="detail-side">
+
+            <div class="client-link-card">
+              <div class="cl-title">客户专属链接</div>
+              <div class="cl-url">unlock-studio-workflow.vercel.app/client/spring2025</div>
+              <button class="cl-copy" onclick="copyClientLink()">复制链接</button>
+            </div>
+
+            <div class="side-card">
+              <div class="side-card-title">项目信息</div>
+              <div class="info-row"><div class="ir-label">当前阶段</div><div class="ir-val accent">S3 · AI分镜</div></div>
+              <div class="info-row"><div class="ir-label">整体进度</div><div class="ir-val accent">60%</div></div>
+              <div class="info-row"><div class="ir-label">交付日期</div><div class="ir-val danger">May 18</div></div>
+              <div class="info-row"><div class="ir-label">剩余天数</div><div class="ir-val warn">12 天</div></div>
+              <div class="info-row"><div class="ir-label">客户确认</div><div class="ir-val warn">2/3 待跟进</div></div>
+              <div class="info-row"><div class="ir-label">分镜进度</div><div class="ir-val">24/40 张</div></div>
+            </div>
+
+            <div class="side-card">
+              <div class="side-card-title">项目成员</div>
+              <div class="team-list">
+                <div class="team-member"><div class="tm-avatar" style="background:var(--accent-dim);color:var(--accent)">陈</div><div class="tm-name">陈昊</div><div class="tm-role">导演</div></div>
+                <div class="team-member"><div class="tm-avatar">李</div><div class="tm-name">李明</div><div class="tm-role">制片</div></div>
+                <div class="team-member"><div class="tm-avatar">王</div><div class="tm-name">王芳</div><div class="tm-role">AI操作</div></div>
+                <div class="team-member"><div class="tm-avatar">张</div><div class="tm-name">张伟</div><div class="tm-role">AI操作</div></div>
+                <div class="team-member"><div class="tm-avatar">赵</div><div class="tm-name">赵雷</div><div class="tm-role">剪辑</div></div>
+              </div>
+            </div>
+
+            <div class="side-card">
+              <div class="side-card-title">最新动态</div>
+              <div class="activity-list">
+                <div class="act-item"><div class="act-dot green"></div><div class="act-content"><div class="act-text">王芳 完成第20-24镜分镜生成</div><div class="act-time">2小时前</div></div></div>
+                <div class="act-item"><div class="act-dot green"></div><div class="act-content"><div class="act-text">陈昊 审核通过第1-19镜</div><div class="act-time">今天 09:30</div></div></div>
+                <div class="act-item"><div class="act-dot amber"></div><div class="act-content"><div class="act-text">客户确认 Stage 2 资产通过</div><div class="act-time">Apr 14</div></div></div>
+                <div class="act-item"><div class="act-dot"></div><div class="act-content"><div class="act-text">张伟 上传资产库完整版</div><div class="act-time">Apr 13</div></div></div>
+                <div class="act-item"><div class="act-dot"></div><div class="act-content"><div class="act-text">李明 创建项目，分配成员</div><div class="act-time">Apr 01</div></div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- STATUS BAR -->
+    <div class="statusbar">
+      <div class="sb-i" style="color:rgba(212,242,112,.4);letter-spacing:.1em;font-weight:600">UNLOCK STUDIO</div>
+      <div class="sb-i" style="color:rgba(212,242,112,.2)">WORKFLOW</div>
+      <div style="width:1px;height:12px;background:rgba(255,255,255,.07)"></div>
+      <div class="sb-i"><div class="sb-dot sd-live"></div>5 个项目运行中</div>
+      <div class="sb-i">3 个待客户确认</div>
+      <div style="margin-left:auto"></div>
+      <div class="sb-i"><div class="sb-dot sd-warn"></div>运动春季KV · 4天后交付</div>
+      <div class="sb-i">Apr 14, 2025</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW PROJECT MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-title">新建项目</div>
+    <div class="form-group">
+      <div class="form-label">项目名称</div>
+      <input class="form-input" placeholder="例：某品牌春季TVC 2025" type="text">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">客户名称</div>
+        <input class="form-input" placeholder="客户公司名" type="text">
+      </div>
+      <div class="form-group">
+        <div class="form-label">交付日期</div>
+        <input class="form-input" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">导演</div>
+        <select class="form-select">
+          <option>陈昊</option><option>李娜</option><option>王磊</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">制片</div>
+        <select class="form-select">
+          <option>李明</option><option>张伟</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">AI操作人员（可多选）</div>
+      <select class="form-select">
+        <option>王芳</option><option>张伟</option><option>刘洋</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <div class="form-label">项目备注</div>
+      <textarea class="form-input" style="height:72px;resize:none" placeholder="Brief要点、特殊要求..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="tb-btn" onclick="closeModal()">取消</button>
+      <button class="tb-btn primary" onclick="createProject()">创建项目</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const views={dashboard:'项目总览',workflow:'AI商业片工作流',detail:'品牌春季广告 2025'};
+const subs={dashboard:'5个进行中 · 2025年4月',workflow:'标准作业流程 · 点击任意任务可勾选',detail:'客户：某品牌 · Stage 3 进行中'};
+
+function switchView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tb-view-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else{
+    document.querySelectorAll('.tb-view-btn').forEach(b=>{
+      if(b.textContent.toLowerCase().includes(name.substring(0,4)))b.classList.add('active');
+    });
+  }
+  document.getElementById('toolbar-title').textContent=views[name]||name;
+  document.getElementById('toolbar-sub').textContent=subs[name]||'';
+}
+
+function setNav(el,view){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  switchView(view,null);
+  document.querySelectorAll('.tb-view-btn').forEach((b,i)=>{
+    const map={dashboard:0,workflow:1,detail:2};
+    if(i===map[view])b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}
+
+function toggleTask(el){
+  const cb=el.querySelector('.tp-check');
+  const done=cb.textContent==='✓';
+  cb.textContent=done?'':'✓';
+  el.classList.toggle('done-t',!done);
+}
+
+function toggleCL(el){
+  const cb=el.querySelector('.cl-cb');
+  const txt=el.querySelector('.cl-text');
+  if(cb.classList.contains('ck')){
+    cb.classList.remove('ck');cb.textContent='';
+    txt.classList.remove('done-cl');
+    cb.classList.remove('ip');
+  } else {
+    cb.classList.add('ck');cb.textContent='✓';
+    txt.classList.add('done-cl');
+  }
+}
+
+function triggerUpload(zone){
+  zone.querySelector('input[type=file]').click();
+}
+
+function handleUpload(input){
+  const list=document.getElementById('upload-list-3');
+  Array.from(input.files).forEach(f=>{
+    const size=f.size>1024*1024?(f.size/1024/1024).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB';
+    const ext=f.name.split('.').pop().toLowerCase();
+    const icon=ext==='mp4'||ext==='mov'?'🎬':ext==='pdf'?'📄':'🖼';
+    const div=document.createElement('div');
+    div.className='uf-item';
+    div.innerHTML=`<div class="uf-icon">${icon}</div><div class="uf-name">${f.name}</div><div class="uf-size">${size}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function createProject(){
+  alert('项目已创建！已添加到侧边栏。');
+  closeModal();
+}
+
+function copyClientLink(){
+  const url='https://unlock-studio-workflow.vercel.app/client/spring2025';
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=event.target;
+    const orig=btn.textContent;
+    btn.textContent='已复制 ✓';
+    setTimeout(()=>btn.textContent=orig,2000);
+  }).catch(()=>alert('客户链接：'+url));
+}
+
+document.getElementById('modal').addEventListener('click',function(e){
+  if(e.target===this)closeModal();
+});
+</script>
+</body>
+</html>
