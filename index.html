@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock Studio Workflow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #0c0c0c;
+  --bg1: #141414;
+  --bg2: #1a1a1a;
+  --bg3: #222222;
+  --bg4: #2a2a2a;
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+  --text: #e8e4dc;
+  --text2: #888880;
+  --text3: #555550;
+  --accent: #d4f270;
+  --accent-dim: rgba(212,242,112,.12);
+  --red: #e06c5a;
+  --blue: #5a9cf5;
+  --purple: #c084f5;
+  --amber: #f5a623;
+  --radius: 10px;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1e1e1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--mono);
+  padding: 32px;
+}
+
+/* ── Mac Window Shell ── */
+.mac-window {
+  width: 1200px;
+  height: 780px;
+  background: var(--bg);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 40px 120px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.05);
+  position: relative;
+}
+
+/* Title bar */
+.titlebar {
+  height: 44px;
+  background: var(--bg1);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+.traffic-lights { display: flex; gap: 8px; }
+.tl { width: 12px; height: 12px; border-radius: 50%; }
+.tl-red { background: #ff5f57; }
+.tl-yellow { background: #febc2e; }
+.tl-green { background: #28c840; }
+.titlebar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text3);
+  font-family: var(--mono);
+  letter-spacing: .04em;
+}
+.titlebar-center .proj-name { color: var(--text2); }
+.titlebar-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.tb-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: .04em;
+  transition: all .15s;
+}
+.tb-btn:hover { color: var(--text); border-color: var(--border2); background: var(--bg2); }
+.tb-btn.primary { background: var(--accent); color: #1a2200; border-color: var(--accent); font-weight: 600; }
+.tb-btn.primary:hover { background: #c8e860; }
+
+/* App layout */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  background: var(--bg1);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-logo .name {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+.sidebar-logo .sub2 {
+  font-size: 8px;
+  color: var(--accent);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-top: 1px;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.sidebar-logo .sub {
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+.watermark {
+  position: absolute;
+  bottom: 36px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 10;
+}
+.wm-main {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(212,242,112,.18);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.wm-sub {
+  font-family: var(--mono);
+  font-size: 7px;
+  color: rgba(212,242,112,.1);
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.sidebar-section { margin-bottom: 20px; }
+.sidebar-label {
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 0 16px;
+  margin-bottom: 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .12s;
+  border-left: 2px solid transparent;
+  font-family: var(--mono);
+}
+.nav-item:hover { color: var(--text); background: var(--bg2); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--bg3);
+  color: var(--text3);
+}
+.nav-badge.live { background: var(--accent-dim); color: var(--accent); }
+
+/* Folder nav items */
+.folder-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .12s;
+  font-family: var(--mono);
+}
+.folder-nav:hover { color: var(--text); background: var(--bg2); }
+.folder-nav.active { color: var(--text); background: var(--bg2); }
+.folder-pip { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.proj-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.proj-card-name { font-size: 11px; font-weight: 500; color: var(--text); font-family: var(--display); }
+.proj-card-meta { font-size: 9px; color: var(--text3); margin-top: 3px; font-family: var(--mono); }
+.proj-progress { margin-top: 8px; height: 2px; background: var(--bg3); border-radius: 1px; }
+.proj-progress-bar { height: 100%; border-radius: 1px; background: var(--accent); width: 48%; }
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Toolbar */
+.toolbar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.toolbar-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.stage-pills { display: flex; gap: 4px; margin-left: 12px; }
+.stage-pill {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  letter-spacing: .05em;
+  cursor: pointer;
+  transition: all .12s;
+}
+.sp-done { background: rgba(212,242,112,.15); color: var(--accent); }
+.sp-active { background: var(--accent); color: #1a2200; font-weight: 600; }
+.sp-wait { background: var(--bg2); color: var(--text3); }
+.toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+
+/* Content */
+.content { flex: 1; overflow-y: auto; padding: 20px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+
+/* Stats row */
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-bottom: 20px; }
+.stat {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+}
+.stat-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-val { font-size: 22px; font-weight: 600; color: var(--text); font-family: var(--display); line-height: 1; }
+.stat-val .unit { font-size: 12px; color: var(--text3); font-family: var(--mono); font-weight: 400; }
+.stat-note { font-size: 9px; margin-top: 4px; font-family: var(--mono); }
+.sn-up { color: var(--accent); }
+.sn-down { color: var(--red); }
+.sn-mid { color: var(--text3); }
+
+/* Timeline */
+.timeline-wrap {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px 20px;
+  margin-bottom: 20px;
+}
+.tl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.tl-title { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; }
+.tl-meta { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+.tl-track { display: flex; align-items: center; position: relative; }
+.tl-seg { flex: 1; height: 1px; }
+.tl-seg.done { background: var(--accent); }
+.tl-seg.partial { background: linear-gradient(90deg, var(--accent) 60%, var(--border2)); }
+.tl-seg.empty { background: var(--border2); }
+.tl-node {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  flex-shrink: 0;
+  position: relative;
+  font-family: var(--display);
+  cursor: pointer;
+  transition: transform .15s;
+  z-index: 1;
+}
+.tl-node:hover { transform: scale(1.1); }
+.tn-done { background: var(--accent); color: #1a2200; }
+.tn-active { background: var(--text); color: #0c0c0c; box-shadow: 0 0 0 3px rgba(232,228,220,.15); }
+.tn-wait { background: var(--bg2); color: var(--text3); border: 1px solid var(--border2); }
+.tl-labels { display: flex; align-items: flex-start; margin-top: 8px; padding: 0 16px; }
+.tl-label-item { flex: 1; text-align: center; }
+.tl-label-item .lname { font-size: 9px; color: var(--text2); font-family: var(--mono); letter-spacing: .05em; }
+.tl-label-item .lname.active { color: var(--accent); }
+.tl-label-item .ldate { font-size: 8px; color: var(--text3); margin-top: 2px; }
+
+/* Section header */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.section-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; }
+.section-action { font-size: 9px; color: var(--text3); cursor: pointer; transition: color .12s; letter-spacing: .04em; }
+.section-action:hover { color: var(--accent); }
+
+/* Folders */
+.folders { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-bottom: 20px; }
+.folder {
+  border-radius: 12px;
+  padding: 14px 12px 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s, box-shadow .15s;
+}
+.folder:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+.folder-icon-wrap { margin-bottom: 10px; }
+.pix { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+.folder-name { font-size: 11px; font-weight: 600; margin-bottom: 1px; font-family: var(--display); }
+.folder-sub { font-size: 9px; opacity: .65; font-family: var(--mono); letter-spacing: .02em; }
+.folder-count {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 9px; padding: 2px 6px; border-radius: 6px;
+  background: rgba(0,0,0,.25); font-family: var(--mono);
+}
+.folder-bar { margin-top: 10px; height: 2px; border-radius: 1px; background: rgba(0,0,0,.2); }
+.folder-bar-fill { height: 100%; border-radius: 1px; transition: width .3s; }
+
+.f-green { background: #d4f270; color: #1a2200; }
+.f-red { background: #e06c5a; color: #fff; }
+.f-blue { background: #5a9cf5; color: #fff; }
+.f-purple { background: #c084f5; color: #fff; }
+.f-amber { background: #f5a623; color: #1a1000; }
+
+/* Kanban */
+.kanban { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+.kcard {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+  overflow: hidden;
+}
+.kcard:hover { border-color: var(--border2); background: var(--bg2); }
+.kcard.k-active { border-color: var(--accent); }
+.kcard.k-active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.kcard.k-locked { opacity: .38; pointer-events: none; }
+.k-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  margin-bottom: 10px;
+  font-family: var(--display);
+}
+.kn-done { background: rgba(212,242,112,.15); color: var(--accent); }
+.kn-active { background: var(--accent); color: #1a2200; }
+.kn-wait { background: var(--bg2); color: var(--text3); }
+.k-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; font-family: var(--display); }
+.k-desc { font-size: 9px; color: var(--text3); line-height: 1.6; font-family: var(--mono); margin-bottom: 8px; }
+.k-tag {
+  font-size: 8px; padding: 2px 8px; border-radius: 8px;
+  display: inline-block; letter-spacing: .06em;
+  font-family: var(--mono); font-weight: 600;
+  text-transform: uppercase;
+}
+.kt-done { background: rgba(212,242,112,.12); color: var(--accent); }
+.kt-active { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.kt-wait { background: var(--bg2); color: var(--text3); }
+
+.checklist { margin-top: 10px; }
+.ci {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 9px; color: var(--text3); margin-bottom: 5px;
+  cursor: pointer; transition: color .1s;
+  font-family: var(--mono);
+}
+.ci:hover { color: var(--text2); }
+.ci.done { color: var(--text3); }
+.cb {
+  width: 12px; height: 12px; border-radius: 2px;
+  border: 1px solid var(--border2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; transition: all .12s;
+}
+.cb.checked { background: var(--accent); border-color: var(--accent); color: #1a2200; font-weight: 700; }
+.cb.inprog { border-color: var(--accent); }
+
+.confirm-bar {
+  background: rgba(212,242,112,.06);
+  border: 1px solid rgba(212,242,112,.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 9px;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  font-family: var(--mono);
+}
+.confirm-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* Statusbar */
+.statusbar {
+  height: 26px;
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.sb-item { font-size: 9px; color: var(--text3); font-family: var(--mono); letter-spacing: .04em; display: flex; align-items: center; gap: 4px; }
+.sb-dot { width: 4px; height: 4px; border-radius: 50%; }
+.sb-live { background: var(--accent); animation: pulse 2s infinite; }
+.sb-mid { background: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="mac-window">
+
+  <!-- Title bar -->
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl tl-red"></div>
+      <div class="tl tl-yellow"></div>
+      <div class="tl tl-green"></div>
+    </div>
+    <div class="titlebar-center">
+      <span>Unlock Studio Workflow</span>
+      <span style="color:var(--border2)">／</span>
+      <span class="proj-name">品牌春季广告 2025</span>
+    </div>
+    <div class="titlebar-right">
+      <button class="tb-btn" onclick="newProject()">+ New Project</button>
+      <button class="tb-btn" onclick="exportReport()">Export</button>
+      <button class="tb-btn primary" onclick="generatePrompts()">Generate ↗</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="name">UNLOCK</div>
+        <div class="sub2">STUDIO WORKFLOW</div>
+        <div class="sub">AI Production · v2.1</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Workspace</div>
+        <div class="nav-item active" onclick="setNav(this)">
+          <div class="nav-dot" style="background:var(--accent)"></div>
+          Overview
+          <span class="nav-badge live">LIVE</span>
+        </div>
+        <div class="nav-item" onclick="setNav(this)">
+          <div class="nav-dot" style="background:var(--text3)"></div>
+          All Projects
+          <span class="nav-badge">3</span>
+        </div>
+        <div class="nav-item" onclick="setNav(this)">
+          <div class="nav-dot" style="background:var(--text3)"></div>
+          Asset Library
+          <span class="nav-badge">67</span>
+        </div>
+        <div class="nav-item" onclick="setNav(this)">
+          <div class="nav-dot" style="background:var(--text3)"></div>
+          Storyboard
+          <span class="nav-badge">24</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Folders</div>
+        <div class="folder-nav active" onclick="setFolder(this, 'treatment')">
+          <div class="folder-pip" style="background:#d4f270"></div>
+          Treatment
+          <span class="nav-badge" style="margin-left:auto">12</span>
+        </div>
+        <div class="folder-nav" onclick="setFolder(this, 'assets')">
+          <div class="folder-pip" style="background:#e06c5a"></div>
+          资产库
+          <span class="nav-badge" style="margin-left:auto">67</span>
+        </div>
+        <div class="folder-nav" onclick="setFolder(this, 'storyboard')">
+          <div class="folder-pip" style="background:#5a9cf5"></div>
+          AI 分镜图
+          <span class="nav-badge" style="margin-left:auto">24</span>
+        </div>
+        <div class="folder-nav" onclick="setFolder(this, 'video')">
+          <div class="folder-pip" style="background:#c084f5"></div>
+          AI 视频素材
+          <span class="nav-badge" style="margin-left:auto">0</span>
+        </div>
+        <div class="folder-nav" onclick="setFolder(this, 'delivery')">
+          <div class="folder-pip" style="background:#f5a623"></div>
+          调色 · 交付
+          <span class="nav-badge" style="margin-left:auto">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="proj-card">
+          <div class="proj-card-name">品牌春季广告 2025</div>
+          <div class="proj-card-meta">导演：陈昊 · May 18 deadline</div>
+          <div class="proj-progress"><div class="proj-progress-bar"></div></div>
+          <div style="font-size:9px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Stage 3/5 · 12 days left</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-title">Project Overview</div>
+        <div class="stage-pills">
+          <div class="stage-pill sp-done" title="Treatment — 完成">S1</div>
+          <div class="stage-pill sp-done" title="资产创建 — 完成">S2</div>
+          <div class="stage-pill sp-active" title="AI分镜 — 进行中">S3</div>
+          <div class="stage-pill sp-wait" title="视频生成 — 待解锁">S4</div>
+          <div class="stage-pill sp-wait" title="调色交付 — 待解锁">S5</div>
+        </div>
+        <div class="toolbar-right">
+          <button class="tb-btn" style="font-size:9px" onclick="toggleView()">Grid / List</button>
+          <button class="tb-btn" style="font-size:9px">Filter</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Current Stage</div>
+            <div class="stat-val" style="font-size:13px;margin-top:4px;color:var(--accent);line-height:1.3">AI<br>Storyboard</div>
+            <div class="stat-note sn-mid">Stage 3 of 5</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Storyboard</div>
+            <div class="stat-val">24<span class="unit">/40</span></div>
+            <div class="stat-note sn-up">↑ +8 today</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Assets</div>
+            <div class="stat-val">67</div>
+            <div class="stat-note sn-mid">人物·场景·道具</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Client Sign-off</div>
+            <div class="stat-val">2<span class="unit">/3</span></div>
+            <div class="stat-note" style="color:var(--amber)">1 pending</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Delivery</div>
+            <div class="stat-val" style="font-size:15px;margin-top:4px">May 18</div>
+            <div class="stat-note sn-down">12 days left</div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-wrap">
+          <div class="tl-header">
+            <div class="tl-title">Production Timeline</div>
+            <div class="tl-meta">2025.04.01 — 2025.05.18</div>
+          </div>
+          <div class="tl-track">
+            <div class="tl-seg done"></div>
+            <div class="tl-node tn-done" title="Treatment — Done">1</div>
+            <div class="tl-seg done"></div>
+            <div class="tl-node tn-done" title="Assets — Done">2</div>
+            <div class="tl-seg partial"></div>
+            <div class="tl-node tn-active" title="Storyboard — In Progress">3</div>
+            <div class="tl-seg empty"></div>
+            <div class="tl-node tn-wait" title="Video Gen — Locked">4</div>
+            <div class="tl-seg empty"></div>
+            <div class="tl-node tn-wait" title="Delivery — Locked">5</div>
+            <div class="tl-seg empty"></div>
+          </div>
+          <div class="tl-labels">
+            <div class="tl-label-item"><div class="lname">Treatment</div><div class="ldate">Apr 01</div></div>
+            <div class="tl-label-item"><div class="lname">Assets</div><div class="ldate">Apr 10</div></div>
+            <div class="tl-label-item"><div class="lname active">Storyboard</div><div class="ldate" style="color:var(--accent)">Apr 22 ←</div></div>
+            <div class="tl-label-item"><div class="lname">Video Gen</div><div class="ldate">May 05</div></div>
+            <div class="tl-label-item"><div class="lname">Delivery</div><div class="ldate">May 18</div></div>
+          </div>
+        </div>
+
+        <!-- Folders -->
+        <div class="section-header">
+          <div class="section-label">Project Folders</div>
+          <div class="section-action" onclick="addFolder()">+ Add Folder</div>
+        </div>
+        <div class="folders">
+
+          <!-- Treatment — pixel doc icon -->
+          <div class="folder f-green" onclick="openFolder('treatment')">
+            <div class="folder-count">12 files</div>
+            <div class="folder-icon-wrap">
+              <svg class="pix" width="36" height="36" viewBox="0 0 16 16">
+                <rect x="2" y="1" width="9" height="12" rx="0" fill="#1a2200"/>
+                <rect x="9" y="1" width="3" height="3" fill="#2d3d00"/>
+                <rect x="9" y="1" width="3" height="1" fill="#1a2200"/>
+                <rect x="11" y="1" width="1" height="3" fill="#1a2200"/>
+                <rect x="4" y="4" width="5" height="1" fill="#3a5500"/>
+                <rect x="4" y="6" width="6" height="1" fill="#3a5500"/>
+                <rect x="4" y="8" width="4" height="1" fill="#3a5500"/>
+                <rect x="4" y="10" width="5" height="1" fill="#3a5500"/>
+                <rect x="13" y="10" width="1" height="1" fill="#d4f270"/>
+                <rect x="14" y="11" width="1" height="1" fill="#d4f270"/>
+                <rect x="13" y="12" width="1" height="1" fill="#d4f270"/>
+                <rect x="11" y="12" width="2" height="1" fill="#d4f270"/>
+              </svg>
+            </div>
+            <div class="folder-name">Treatment</div>
+            <div class="folder-sub">导演手册 · Demo剪辑</div>
+            <div class="folder-bar"><div class="folder-bar-fill" style="width:100%;background:#1a2200"></div></div>
+          </div>
+
+          <!-- Assets — pixel art palette icon -->
+          <div class="folder f-red" onclick="openFolder('assets')">
+            <div class="folder-count">67 assets</div>
+            <div class="folder-icon-wrap">
+              <svg class="pix" width="36" height="36" viewBox="0 0 16 16">
+                <rect x="1" y="4" width="14" height="10" rx="0" fill="rgba(0,0,0,.3)"/>
+                <rect x="1" y="4" width="5" height="2" rx="0" fill="rgba(0,0,0,.25)"/>
+                <circle cx="5" cy="8" r="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="2" y="11" width="12" height="1" fill="rgba(0,0,0,.15)"/>
+                <polygon points="2,14 5,10 8,12 11,8 14,14" fill="rgba(255,255,255,.35)"/>
+                <rect x="12" y="5" width="2" height="2" fill="rgba(255,200,100,.6)"/>
+              </svg>
+            </div>
+            <div class="folder-name">资产库</div>
+            <div class="folder-sub">人物 · 场景 · 服化道</div>
+            <div class="folder-bar"><div class="folder-bar-fill" style="width:100%;background:rgba(0,0,0,.2)"></div></div>
+          </div>
+
+          <!-- Storyboard — pixel grid icon -->
+          <div class="folder f-blue" onclick="openFolder('storyboard')">
+            <div class="folder-count">24/40</div>
+            <div class="folder-icon-wrap">
+              <svg class="pix" width="36" height="36" viewBox="0 0 16 16">
+                <rect x="1" y="1" width="6" height="6" rx="0" fill="rgba(255,255,255,.4)"/>
+                <rect x="9" y="1" width="6" height="6" rx="0" fill="rgba(255,255,255,.4)"/>
+                <rect x="1" y="9" width="6" height="6" rx="0" fill="rgba(255,255,255,.4)"/>
+                <rect x="9" y="9" width="6" height="6" rx="0" fill="rgba(255,255,255,.15)"/>
+                <rect x="2" y="2" width="4" height="1" fill="rgba(255,255,255,.3)"/>
+                <rect x="2" y="4" width="3" height="1" fill="rgba(255,255,255,.3)"/>
+                <rect x="10" y="2" width="4" height="3" fill="rgba(255,255,255,.25)"/>
+                <rect x="2" y="10" width="4" height="4" fill="rgba(255,255,255,.25)"/>
+                <rect x="10" y="11" width="3" height="1" fill="rgba(255,255,255,.3)"/>
+                <rect x="10" y="13" width="2" height="1" fill="rgba(255,255,255,.3)"/>
+              </svg>
+            </div>
+            <div class="folder-name">AI 分镜图</div>
+            <div class="folder-sub">对照Demo逐镜生成</div>
+            <div class="folder-bar"><div class="folder-bar-fill" style="width:60%;background:rgba(255,255,255,.6)"></div></div>
+          </div>
+
+          <!-- Video — pixel camera/play icon -->
+          <div class="folder f-purple" onclick="openFolder('video')">
+            <div class="folder-count">待开始</div>
+            <div class="folder-icon-wrap">
+              <svg class="pix" width="36" height="36" viewBox="0 0 16 16">
+                <rect x="1" y="3" width="10" height="10" rx="0" fill="rgba(0,0,0,.3)"/>
+                <rect x="11" y="5" width="1" height="1" fill="rgba(255,255,255,.5)"/>
+                <rect x="12" y="6" width="1" height="1" fill="rgba(255,255,255,.5)"/>
+                <rect x="13" y="7" width="1" height="2" fill="rgba(255,255,255,.5)"/>
+                <rect x="12" y="9" width="1" height="1" fill="rgba(255,255,255,.5)"/>
+                <rect x="11" y="10" width="1" height="1" fill="rgba(255,255,255,.5)"/>
+                <polygon points="4,6 4,10 8,8" fill="rgba(255,255,255,.7)"/>
+                <rect x="1" y="3" width="10" height="1" fill="rgba(255,255,255,.1)"/>
+              </svg>
+            </div>
+            <div class="folder-name">AI 视频素材</div>
+            <div class="folder-sub">逐镜跑图 · 回填剪辑</div>
+            <div class="folder-bar"><div class="folder-bar-fill" style="width:0%;background:rgba(255,255,255,.5)"></div></div>
+          </div>
+
+          <!-- Delivery — pixel export icon -->
+          <div class="folder f-amber" onclick="openFolder('delivery')">
+            <div class="folder-count">待开始</div>
+            <div class="folder-icon-wrap">
+              <svg class="pix" width="36" height="36" viewBox="0 0 16 16">
+                <rect x="2" y="4" width="12" height="9" rx="0" fill="rgba(0,0,0,.25)"/>
+                <rect x="7" y="5" width="2" height="5" fill="rgba(255,255,255,.7)"/>
+                <polygon points="5,8 8,5 11,8" fill="rgba(255,255,255,.7)"/>
+                <rect x="4" y="11" width="8" height="1" fill="rgba(255,255,255,.5)"/>
+                <rect x="2" y="13" width="12" height="1" fill="rgba(0,0,0,.2)"/>
+                <rect x="2" y="4" width="12" height="1" fill="rgba(255,255,255,.1)"/>
+              </svg>
+            </div>
+            <div class="folder-name">调色 · 交付</div>
+            <div class="folder-sub">Online · 字幕 · 成片</div>
+            <div class="folder-bar"><div class="folder-bar-fill" style="width:0%;background:rgba(0,0,0,.25)"></div></div>
+          </div>
+
+        </div>
+
+        <!-- Kanban -->
+        <div class="section-header">
+          <div class="section-label">Stage Board</div>
+          <div class="section-action">View All</div>
+        </div>
+        <div class="kanban">
+
+          <div class="kcard">
+            <div class="k-num kn-done">1</div>
+            <div class="k-title">Treatment</div>
+            <div class="k-desc">导演手册 · 风格定义 · 参考收集 · Demo剪辑线 · 分镜截图</div>
+            <span class="k-tag kt-done">DONE</span>
+            <div class="checklist">
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>Treatment文档</div>
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>Demo剪辑线</div>
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>分镜截图 40张</div>
+            </div>
+          </div>
+
+          <div class="kcard">
+            <div class="k-num kn-done">2</div>
+            <div class="k-title">资产创建</div>
+            <div class="k-desc">人物设计 · 场景氛围 · 服化道资产图 · 全套AI资产库</div>
+            <span class="k-tag kt-done">DONE</span>
+            <div class="checklist">
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>人物 5 角色</div>
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>场景 12 个</div>
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>客户已确认</div>
+            </div>
+          </div>
+
+          <div class="kcard k-active">
+            <div class="k-num kn-active">3</div>
+            <div class="k-title">AI 分镜生成</div>
+            <div class="k-desc">对照截图逐镜提示词 · 人物场景匹配 · 替换正式脚本</div>
+            <span class="k-tag kt-active">IN PROGRESS</span>
+            <div class="checklist">
+              <div class="ci done" onclick="toggleCheck(this)"><div class="cb checked">✓</div>第 1–24 镜完成</div>
+              <div class="ci" onclick="toggleCheck(this)"><div class="cb inprog"></div>第 25–40 镜生成中</div>
+              <div class="ci" onclick="toggleCheck(this)"><div class="cb"></div>客户最终确认</div>
+            </div>
+            <div class="confirm-bar"><div class="confirm-dot"></div>待确认后解锁 Stage 4</div>
+          </div>
+
+          <div class="kcard k-locked">
+            <div class="k-num kn-wait">4</div>
+            <div class="k-title">AI 视频生成</div>
+            <div class="k-desc">逐镜跑视频 · 素材筛选 · 回填Demo剪辑线</div>
+            <span class="k-tag kt-wait">LOCKED</span>
+            <div class="checklist">
+              <div class="ci"><div class="cb"></div>逐镜生成视频</div>
+              <div class="ci"><div class="cb"></div>回填剪辑线</div>
+              <div class="ci"><div class="cb"></div>粗剪审片</div>
+            </div>
+          </div>
+
+          <div class="kcard k-locked">
+            <div class="k-num kn-wait">5</div>
+            <div class="k-title">调色 · 交付</div>
+            <div class="k-desc">调色 · Online精剪 · 包装字幕 · 最终成片交付</div>
+            <span class="k-tag kt-wait">LOCKED</span>
+            <div class="checklist">
+              <div class="ci"><div class="cb"></div>调色完成</div>
+              <div class="ci"><div class="cb"></div>Online包装</div>
+              <div class="ci"><div class="cb"></div>成片交付</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- /content -->
+
+      <!-- Status bar -->
+      <div class="statusbar">
+        <div class="sb-item" style="color:rgba(212,242,112,.3);letter-spacing:.1em;font-weight:600">UNLOCK STUDIO</div>
+        <div class="sb-item" style="color:rgba(212,242,112,.15);letter-spacing:.06em">WORKFLOW</div>
+        <div class="sb-item" style="width:1px;height:12px;background:var(--border2);padding:0"></div>
+        <div class="sb-item"><div class="sb-dot sb-live"></div>LIVE</div>
+        <div class="sb-item">Stage 3 / 5</div>
+        <div class="sb-item">Storyboard 24/40</div>
+        <div class="sb-item" style="margin-left:auto"><div class="sb-dot sb-mid"></div>Client sign-off pending</div>
+        <div class="sb-item">May 18 delivery · 12 days</div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-body -->
+  <!-- Watermark -->
+  <div class="watermark">
+    <div class="wm-main">UNLOCK STUDIO</div>
+    <div class="wm-sub">WORKFLOW SYSTEM</div>
+  </div>
+
+</div><!-- /mac-window -->
+
+<script>
+function toggleCheck(el) {
+  const cb = el.querySelector('.cb');
+  if (cb.classList.contains('checked')) {
+    cb.classList.remove('checked');
+    cb.textContent = '';
+    el.classList.remove('done');
+  } else {
+    cb.classList.add('checked');
+    cb.classList.remove('inprog');
+    cb.textContent = '✓';
+    el.classList.add('done');
+  }
+}
+function setNav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+function setFolder(el, name) {
+  document.querySelectorAll('.folder-nav').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+function openFolder(name) {
+  const labels = {
+    treatment: 'Treatment 文件夹 — 12 files',
+    assets: '资产库 — 67 assets',
+    storyboard: 'AI 分镜图 — 24/40 完成',
+    video: 'AI 视频素材 — 待开始',
+    delivery: '调色 · 交付 — 待开始',
+  };
+  console.log('Open folder:', labels[name]);
+}
+function newProject() { alert('New Project — Brief 模版即将开放'); }
+function exportReport() { alert('Export — 正在生成进度报告 PDF...'); }
+function generatePrompts() { alert('Generate — 正在为第25-40镜生成提示词...'); }
+function toggleView() {}
+</script>
+
+</body>
+</html>
